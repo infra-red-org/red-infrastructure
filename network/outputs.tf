@@ -18,12 +18,12 @@ output "subnet_id" {
   value       = google_compute_subnetwork.subnet.id
 }
 
-output "router_name" {
-  description = "The name of the cloud router"
-  value       = google_compute_router.router.name
-}
+# output "router_name" {
+#   description = "The name of the cloud router"
+#   value       = google_compute_router.router.name
+# }
 
-output "nat_name" {
-  description = "The name of the cloud NAT"
-  value       = google_compute_router_nat.nat.name
-}
+# output "nat_name" {
+#   description = "The name of the cloud NAT"
+#   value       = google_compute_router_nat.nat.name
+# }

@@ -1,0 +1,71 @@
+name: "Terraform Infrastructure Deployment"
+
+on:
+  workflow_dispatch:  # Manual trigger
+  # push:            # Commented out push trigger
+  #   branches:
+  #     - main
+
+permissions:
+  contents: read
+  id-token: write  
+
+jobs:
+  terraform:
+    name: "Terraform"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5.0"
+
+      - name: Auth to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}  
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}    
+          token_format: access_token
+          audience: 'sts.googleapis.com'  
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Create tfvars file
+        run: |
+          cat > terraform.tfvars <<EOF
+          project_id     = "${{ secrets.GCP_PROJECT_ID }}"
+          region        = "${{ secrets.GCP_REGION }}"
+          cluster_name  = "${{ secrets.CLUSTER_NAME }}"
+          vpc_name      = "${{ secrets.VPC_NAME }}"
+          subnet_name   = "${{ secrets.SUBNET_NAME }}"
+          subnet_cidr   = "${{ secrets.SUBNET_CIDR }}"
+          pod_cidr      = "${{ secrets.POD_CIDR }}"
+          service_cidr  = "${{ secrets.SERVICE_CIDR }}"
+          EOF
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Format
+        run: terraform fmt 
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -no-color
+        
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      - name: Wait for 30 seconds
+        run: sleep 30
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
