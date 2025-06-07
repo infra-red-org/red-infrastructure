@@ -22,7 +22,8 @@ resource "google_service_account_iam_binding" "workload_identity_binding" {
   service_account_id = google_service_account.workload_identity_sa.name
   role               = "roles/iam.workloadIdentityUser"
   members = [
-    "serviceAccount:${var.project_id}.svc.id.goog[default/default]" # applies to the default namespace
+    "serviceAccount:${var.project_id}.svc.id.goog[default/default]", # applies to the default namespace
+    "serviceAccount:${var.project_id}.svc.id.goog[keda/keda-operator]" # applies to the KEDA operator service account
     # "serviceAccount:${var.project_id}.svc.id.goog[<namespace>/<service-account-name>]" # applies to a specific namespace and service account
     # "serviceAccount:${var.project_id}.svc.id.goog[<namespace>/*]" # applies to all service accounts in a specific namespace
     # "serviceAccount:${var.project_id}.svc.id.goog[*/<service-account-name>]" # applies to a specific service account in all namespaces
