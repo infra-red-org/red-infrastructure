@@ -15,7 +15,6 @@ module "iam" {
   project_id    = var.project_id
 }
 
-
 module "gke" {
   source                   = "./gke"
   project_id               = var.project_id
@@ -26,5 +25,23 @@ module "gke" {
   cluster_ipv4_cidr_block  = var.pod_cidr
   services_ipv4_cidr_block = var.service_cidr
   depends_on               = [module.network, module.iam]
+}
+
+# KEDA module for event-driven autoscaling
+module "keda" {
+  source = "./keda"
+  
+  project_id = var.project_id
+  
+  # Specify the KEDA version explicitly for version control
+  chart_version = "2.17"
+  
+  # Use the existing workload identity service account
+  existing_service_account_email = module.iam.workload_identity_sa_email
+  
+  # Ensure KEDA is installed after the GKE cluster is created
+  depends_on = [
+    module.gke
+  ]
 }
 
