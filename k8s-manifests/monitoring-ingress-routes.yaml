@@ -1,0 +1,95 @@
+# Traefik IngressRoutes for Monitoring Stack with Subdomains
+# Apply this after the cluster is up and running with Traefik and kube-prometheus-stack installed
+# DNS Records needed (replace example.com with your actual domain):
+# gke-prometheus.example.com  A  <TRAEFIK_EXTERNAL_IP>
+# gke-grafana.example.com     A  <TRAEFIK_EXTERNAL_IP>
+
+---
+# HTTP to HTTPS redirect middleware
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: https-redirect
+  namespace: monitoring
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+
+---
+# HTTP IngressRoute for Prometheus (for ACME challenges and redirect)
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: prometheus-ingress-http
+  namespace: monitoring
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`gke-prometheus.example.com`)
+      kind: Rule
+      services:
+        - name: kube-prometheus-stack1-prometheus
+          port: 9090
+      middlewares:
+        - name: https-redirect
+
+---
+# HTTPS IngressRoute for Prometheus
+# Access via: https://gke-prometheus.example.com
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: prometheus-ingress
+  namespace: monitoring
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`gke-prometheus.example.com`)
+      kind: Rule
+      services:
+        - name: kube-prometheus-stack1-prometheus
+          port: 9090
+  tls:
+    certResolver: letsencrypt
+
+---
+# HTTP IngressRoute for Grafana (for ACME challenges and redirect)
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grafana-ingress-http
+  namespace: monitoring
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`gke-grafana.example.com`)
+      kind: Rule
+      services:
+        - name: kube-prometheus-stack1-grafana
+          port: 80
+      middlewares:
+        - name: https-redirect
+
+---
+# HTTPS IngressRoute for Grafana
+# Access via: https://gke-grafana.example.com
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`gke-grafana.example.com`)
+      kind: Rule
+      services:
+        - name: kube-prometheus-stack1-grafana
+          port: 80
+  tls:
+    certResolver: letsencrypt

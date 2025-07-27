@@ -11,8 +11,8 @@ module "network" {
 }
 
 module "iam" {
-  source = "./iam"
-  project_id    = var.project_id
+  source     = "./iam"
+  project_id = var.project_id
 }
 
 module "gke" {
@@ -29,19 +29,31 @@ module "gke" {
 
 # KEDA module for event-driven autoscaling
 module "keda" {
-  source = "./keda"
-  
-  project_id = var.project_id
-  
-  # Specify the KEDA version explicitly for version control
-  chart_version = "2.17"
-  
-  # Use the existing workload identity service account
-  existing_service_account_email = module.iam.workload_identity_sa_email
-  
-  # Ensure KEDA is installed after the GKE cluster is created
+  source                         = "./keda"
+  project_id                     = var.project_id
+  existing_service_account_email = module.iam.workload_identity_sa_email # Use the existing workload identity service account
   depends_on = [
     module.gke
   ]
 }
+
+module "kube_prometheus_stack" {
+  source            = "./kube-prometheus-stack"
+  namespace         = "monitoring"
+  create_namespace  = true
+  prometheus_domain = var.prometheus_domain
+  grafana_domain    = var.grafana_domain
+  depends_on        = [module.gke]
+}
+
+module "traefik" {
+  source            = "./traefik"
+  namespace         = "traefik-v2"
+  create_namespace  = true
+  chart_version     = "36.3.0"
+  letsencrypt_email = var.letsencrypt_email
+  traefik_domain    = var.traefik_domain
+  depends_on        = [module.gke]
+}
+
 

@@ -39,4 +39,27 @@ variable "service_cidr" {
   type        = string
 }
 
-  
+# Domain and SSL configuration
+variable "letsencrypt_email" {
+  description = "Email address for Let's Encrypt certificate notifications"
+  type        = string
+  default     = "admin@example.com"
+}
+
+variable "prometheus_domain" {
+  description = "Domain for Prometheus access"
+  type        = string
+  default     = "gke-prometheus.example.com"
+}
+
+variable "grafana_domain" {
+  description = "Domain for Grafana access"
+  type        = string
+  default     = "gke-grafana.example.com"
+}
+
+variable "traefik_domain" {
+  description = "Domain for Traefik dashboard"
+  type        = string
+  default     = "gke-traefik.example.com"
+}
