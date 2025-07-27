@@ -22,7 +22,7 @@ variable "namespace" {
 variable "chart_version" {
   description = "Version of the KEDA Helm chart"
   type        = string
-  default     = "2.17.1"
+  default     = "2.17"
 }
 
 # Email of the existing service account to use

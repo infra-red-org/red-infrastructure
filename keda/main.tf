@@ -5,7 +5,7 @@ resource "helm_release" "keda" {
   chart            = "keda"
   namespace        = var.namespace
   create_namespace = true
-  version          = var.chart_version
+  # version          = var.chart_version
 }
 
 # Grant necessary permissions to the existing service account
