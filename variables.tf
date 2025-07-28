@@ -63,3 +63,22 @@ variable "traefik_domain" {
   type        = string
   default     = "gke-traefik.example.com"
 }
+
+variable "github_repositories" {
+  description = "List of GitHub repositories in the format 'owner/repo' for Workload Identity Federation"
+  type        = list(string)
+  default     = ["your-github-username/your-repo-name"]
+}
+
+# Workload Identity Configuration (optional overrides)
+variable "workload_identity_pool_id" {
+  description = "ID for the Workload Identity Pool"
+  type        = string
+  default     = "terraform-github-pool"
+}
+
+variable "service_account_id" {
+  description = "ID for the Workload Identity Service Account"
+  type        = string
+  default     = "terraform-github-sa"
+}

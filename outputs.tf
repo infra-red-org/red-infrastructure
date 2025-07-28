@@ -48,3 +48,14 @@ output "service_urls" {
     traefik    = "https://${var.traefik_domain}"
   }
 }
+
+# Workload Identity Federation Information
+output "workload_identity_provider" {
+  description = "Workload Identity Provider name for GitHub Actions"
+  value       = module.iam.workload_identity_pool_provider_name
+}
+
+output "workload_identity_service_account" {
+  description = "Service Account email for Workload Identity"
+  value       = module.iam.workload_identity_sa_email
+}

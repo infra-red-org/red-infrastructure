@@ -17,3 +17,13 @@ output "workload_identity_sa_member" {
   description = "Member string for the Workload Identity service account"
   value       = "serviceAccount:${google_service_account.workload_identity_sa.email}"
 }
+
+output "workload_identity_pool_provider_name" {
+  description = "The resource name of the Workload Identity Pool Provider"
+  value       = google_iam_workload_identity_pool_provider.github_provider.name
+}
+
+output "workload_identity_pool_name" {
+  description = "The resource name of the Workload Identity Pool"
+  value       = google_iam_workload_identity_pool.github_pool.name
+}
