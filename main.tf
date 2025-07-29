@@ -11,8 +11,11 @@ module "network" {
 }
 
 module "iam" {
-  source     = "./iam"
-  project_id = var.project_id
+  source                     = "./iam"
+  project_id                 = var.project_id
+  github_repositories        = var.github_repositories
+  workload_identity_pool_id  = var.workload_identity_pool_id
+  service_account_id         = var.service_account_id
 }
 
 module "gke" {

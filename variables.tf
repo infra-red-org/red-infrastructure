@@ -63,3 +63,20 @@ variable "traefik_domain" {
   type        = string
   default     = "gke-traefik.example.com"
 }
+
+# GitHub repositories for Workload Identity Federation
+variable "github_repositories" {
+  description = "List of GitHub repositories that should have access to deploy this infrastructure"
+  type        = list(string)
+}
+
+# Workload Identity Configuration
+variable "workload_identity_pool_id" {
+  description = "ID for the Workload Identity Pool"
+  type        = string
+}
+
+variable "service_account_id" {
+  description = "ID for the service account used with Workload Identity"
+  type        = string
+}

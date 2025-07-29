@@ -17,6 +17,15 @@ resource "google_project_iam_member" "keda_permissions" {
   member  = "serviceAccount:${var.existing_service_account_email}"
 }
 
+# GKE Workload Identity binding (allows KEDA operator to impersonate the service account)
+resource "google_service_account_iam_binding" "keda_workload_identity_binding" {
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.existing_service_account_email}"
+  role               = "roles/iam.workloadIdentityUser"
+  members = [
+    "serviceAccount:${var.project_id}.svc.id.goog[${var.namespace}/${var.k8s_service_account}]"
+  ]
+}
+
 # Uncomment this block to automatically annotate the KEDA operator service account
 # This ensures the Kubernetes service account can use Workload Identity
 # Note: This requires the kubernetes provider to be configured
