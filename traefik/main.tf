@@ -4,7 +4,7 @@ resource "helm_release" "traefik" {
   chart            = "traefik"
   namespace        = var.namespace
   create_namespace = var.create_namespace
-  version          = "36.3.0" # Updated to latest version
+  version          = var.chart_version
 
   values = [
     yamlencode({

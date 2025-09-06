@@ -1,11 +1,3 @@
-# resource "helm_release" "kube_prometheus_stack" {
-#   name       = "kube-prometheus-stack"
-#   repository = "https://prometheus-community.github.io/helm-charts"
-#   chart      = "kube-prometheus-stack"
-#   namespace  = var.namespace
-#   create_namespace = var.create_namespace
-# }
-
 resource "helm_release" "kube_prometheus_stack" {
   name             = "kube-prometheus-stack1"
   repository       = "prometheus-community"

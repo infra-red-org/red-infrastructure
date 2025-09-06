@@ -19,7 +19,7 @@ variable "create_namespace" {
 variable "letsencrypt_email" {
   description = "Email address for Let's Encrypt certificate notifications"
   type        = string
-  default     = "samuelnnanna205@gmail.com"
+  default     = "user@example.com"
 }
 
 variable "traefik_domain" {
