@@ -36,7 +36,21 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: '3.12.0'
+
+      - name: Setup Helm Repositories
+        run: |
+          helm repo add traefik https://traefik.github.io/charts
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add kedacore https://kedacore.github.io/charts
+          helm repo update
+          helm repo list
+
       - name: Create tfvars file
+        working-directory: red-infrastructure
         run: |
           cat > terraform.tfvars <<EOF
           project_id     = "${{ secrets.GCP_PROJECT_ID }}"
@@ -47,25 +61,61 @@ jobs:
           subnet_cidr   = "${{ secrets.SUBNET_CIDR }}"
           pod_cidr      = "${{ secrets.POD_CIDR }}"
           service_cidr  = "${{ secrets.SERVICE_CIDR }}"
+          
+          # Domain and SSL configuration will use default values from variables.tf
+          # Update variables.tf defaults when you have your actual domain
           EOF
 
       - name: Terraform Init
+        working-directory: red-infrastructure
         run: terraform init
 
       - name: Terraform Format
+        working-directory: red-infrastructure
         run: terraform fmt 
 
       - name: Terraform Validate
+        working-directory: red-infrastructure
         run: terraform validate
 
       - name: Terraform Plan
+        working-directory: red-infrastructure
         run: terraform plan -no-color
         
       - name: Terraform Apply
+        working-directory: red-infrastructure
         run: terraform apply -auto-approve
 
-      - name: Wait for 30 seconds
-        run: sleep 30
+      - name: Configure kubectl
+        run: |
+          gcloud container clusters get-credentials ${{ secrets.CLUSTER_NAME }} --region ${{ secrets.GCP_REGION }} --project ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Terraform Destroy
-        run: terraform destroy -auto-approve
+      - name: Wait for cluster and services to be ready
+        run: |
+          echo "Waiting for cluster to be fully ready..."
+          kubectl wait --for=condition=ready nodes --all --timeout=300s
+          
+          echo "Waiting for Traefik to be ready..."
+          kubectl wait --for=condition=available deployment/traefik -n traefik-v2 --timeout=300s
+          
+          echo "Waiting for Prometheus to be ready..."
+          kubectl wait --for=condition=available deployment/kube-prometheus-stack1-prometheus-operator -n monitoring --timeout=300s
+          
+          echo "Waiting for Grafana to be ready..."
+          kubectl wait --for=condition=available deployment/kube-prometheus-stack1-grafana -n monitoring --timeout=300s
+
+      - name: Apply Kubernetes Manifests
+        working-directory: red-infrastructure
+        run: |
+          echo "Applying all Kubernetes manifests..."
+          kubectl apply -f k8s-manifests/
+          
+          echo "Verifying resources were created..."
+          kubectl get ingressroute -A
+          kubectl get middleware -A
+
+      - name: Deployment Complete
+        run: |
+          echo "=== Infrastructure Deployment Complete ==="
+          echo "All resources have been deployed successfully."
+          echo "Refer to the documentation for access instructions."

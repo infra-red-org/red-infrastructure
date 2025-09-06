@@ -39,4 +39,44 @@ variable "service_cidr" {
   type        = string
 }
 
-  
+# Domain and SSL configuration
+variable "letsencrypt_email" {
+  description = "Email address for Let's Encrypt certificate notifications"
+  type        = string
+  default     = "admin@example.com"
+}
+
+variable "prometheus_domain" {
+  description = "Domain for Prometheus access"
+  type        = string
+  default     = "gke-prometheus.example.com"
+}
+
+variable "grafana_domain" {
+  description = "Domain for Grafana access"
+  type        = string
+  default     = "gke-grafana.example.com"
+}
+
+variable "traefik_domain" {
+  description = "Domain for Traefik dashboard"
+  type        = string
+  default     = "gke-traefik.example.com"
+}
+
+# GitHub repositories for Workload Identity Federation
+variable "github_repositories" {
+  description = "List of GitHub repositories that should have access to deploy this infrastructure"
+  type        = list(string)
+}
+
+# Workload Identity Configuration
+variable "workload_identity_pool_id" {
+  description = "ID for the Workload Identity Pool"
+  type        = string
+}
+
+variable "service_account_id" {
+  description = "ID for the service account used with Workload Identity"
+  type        = string
+}

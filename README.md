@@ -131,6 +131,24 @@ After deployment, configure kubectl:
 gcloud container clusters get-credentials <cluster-name> --region <cluster-region>
 ```
 
+## Applying Monitoring IngressRoutes
+
+After the infrastructure is deployed, apply the monitoring IngressRoutes to enable path-based routing:
+
+```bash
+# Make sure you're connected to the cluster first
+gcloud container clusters get-credentials cdsci-cluster --region us-central1
+
+# Apply the monitoring IngressRoutes
+./scripts/apply-monitoring-routes.sh
+```
+
+Or manually:
+
+```bash
+kubectl apply -f k8s-manifests/monitoring-ingress-routes.yaml
+```
+
 ## CI/CD Integration
 
 This repository includes GitHub Actions workflows for automated deployment:
@@ -157,6 +175,22 @@ Detailed documentation is available in the following files:
 - [IAM Module](Documentation/iam.md)
 - [Network Module](Documentation/network.md)
 - [Complete System](Documentation/red_infrastructure.md)
+- [Monitoring Access Guide](Documentation/monitoring_access.md)
+
+## Monitoring and Load Balancing
+
+This infrastructure includes integrated monitoring and load balancing capabilities:
+
+- **Traefik**: Load balancer with dashboard and path-based routing
+- **Prometheus**: Metrics collection and monitoring
+- **Grafana**: Visualization and dashboards
+
+After deployment, access monitoring interfaces through Traefik's external IP:
+- Prometheus: `http://<TRAEFIK_IP>/prometheus`
+- Grafana: `http://<TRAEFIK_IP>/grafana` (admin/prom-operator)
+- Traefik Dashboard: `http://<TRAEFIK_IP>:8080/dashboard/`
+
+For detailed access instructions and troubleshooting, see the [Monitoring Access Guide](Documentation/monitoring_access.md).
 
 ## Contributing
 

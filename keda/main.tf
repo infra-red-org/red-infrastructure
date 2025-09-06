@@ -5,7 +5,7 @@ resource "helm_release" "keda" {
   chart            = "keda"
   namespace        = var.namespace
   create_namespace = true
-  version          = var.chart_version
+  # version          = var.chart_version
 }
 
 # Grant necessary permissions to the existing service account
@@ -15,6 +15,15 @@ resource "google_project_iam_member" "keda_permissions" {
   project = var.project_id
   role    = each.key
   member  = "serviceAccount:${var.existing_service_account_email}"
+}
+
+# GKE Workload Identity binding (allows KEDA operator to impersonate the service account)
+resource "google_service_account_iam_binding" "keda_workload_identity_binding" {
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.existing_service_account_email}"
+  role               = "roles/iam.workloadIdentityUser"
+  members = [
+    "serviceAccount:${var.project_id}.svc.id.goog[${var.namespace}/${var.k8s_service_account}]"
+  ]
 }
 
 # Uncomment this block to automatically annotate the KEDA operator service account
